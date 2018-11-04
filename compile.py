@@ -1,5 +1,4 @@
 import orchestrate
-import transpose
 import compose
 import harmonize
 from compose import *
@@ -20,7 +19,9 @@ score = """
 
 section = """
 \\new Staff \\with{{
-	 midiInstrument = "{insturment}"
+	 instrumentName = #"{insturment}"
+	 shortInstrumentName = #"{short}"
+	 midiInstrument = "{midiInstrument}"
 }}{{
 \\absolute {{
 \\tempo 4 = 150
@@ -28,15 +29,26 @@ section = """
 \\numericTimeSignature
 \\clef {clef}
 {part}
+\\bar "|."
 }}
 }}
 """
 
 ACTUALLY_DO_THINGS = True
-numbParts = 5
-clefs = ['"treble"','"treble"', '"alto"','"bass"',"treble"]
-insturments=['Flute','Violin','French Horn','Contrabass','Vibraphone']
-desiredLength = 125
+# clefs = ['"treble"','"treble"', '"alto"','"bass"',"treble"]
+# insturments=['Flute','Violin','Viola','Bassoon','Vibraphone']
+# shortInstrumentNames = ["Fl.","Vn","Va.","Bn.","Vib."]
+# ranges = [[60,98],[55,93],[36,72],[34,67],[53,89]]
+
+clefs = ['"treble"','"treble"', '"alto"','"bass"']
+insturments=['Violin 1','Violin 2','Viola','Violoncello']
+midiInstrument = ['Violin','Violin','Viola','Cello']
+shortInstrumentNames = ["Vn.1","Vn.2","Va.","Vc."]
+ranges = [[55,93],[55,93],[36,72],[36,67]]
+primaryInsturment = 0 #first violin
+
+numbParts = len(ranges)
+desiredLength = 100
 # desired length doesn't work for 40
 
 
@@ -50,13 +62,17 @@ if not ACTUALLY_DO_THINGS:
 else:
 	built = False
 	while not built:
-		segments = compose.generateSegments(desiredLength)
-		print segments
-		assignments = orchestrate.getAssignments(numbParts,len(segments),1)
-		print assignments
-		harmonyTranspositions = harmonize.genHarmonies([[60,98],[55,93],[36,72],[24,60],[53,89]], segments,assignments,0)
-		print harmonyTranspositions
-		built = True
+		try:
+			segments = compose.generateSegments(desiredLength)
+			print segments
+			assignments = orchestrate.getAssignments(numbParts,len(segments),primaryInsturment)
+			print assignments
+			harmonyTranspositions = harmonize.genHarmonies(ranges, segments,assignments,0)
+			print harmonyTranspositions
+			built = True
+		except ValueError as ve:
+			print ve
+			print "whelp"
 		#harmony Transposition sometimes fails if an assigned section is too large for an insturments range.
 		# this should be rare, but here we are.
 	
@@ -142,7 +158,7 @@ for i in range(len(segments)):
 
 completeParts = []
 for p in range(numbParts):
-	completePart = section.format(clef=clefs[p],part="".join(allParts[p]),insturment=insturments[p] )
+	completePart = section.format(clef=clefs[p],part="".join(allParts[p]),insturment=insturments[p],short=shortInstrumentNames[p],midiInstrument = midiInstrument[p] )
 	completeParts.append(completePart)
 
 completeScore = score.format(sections="\n".join(completeParts))

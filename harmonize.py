@@ -105,7 +105,7 @@ def genHarmonies(ranges, segments, assignments, key):
 						newTrans = getCloseToActualRange(ranges[insturment], midiRange)*len(compose.scale)+harmonicTranspose
 						#set all the things here
 						# we need to set this earlier
-						if segNumb > 85 and insturment == 1:
+						if segNumb > .85*len(segments) and assignments[insturment][len(segments)-1] == 1:
 							print 'HERE????'
 							newTrans = 0
 				if newTrans != None:

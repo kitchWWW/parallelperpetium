@@ -1,4 +1,5 @@
 from random import randint
+import random
 import sys
 
 _totalInsturments = 0
@@ -124,8 +125,7 @@ def getAssignments(totalInsturments,totalLength,soloist):
 			# make sure everyone plays before we have a big tuti
 			peopleWhoHavePlayed = [0]*totalInsturments
 			for i in range(totalLength):
-				if intensityMap[i] == 4 or intensityMap[i] == 5:
-					if sum(peopleWhoHavePlayed) != 5:
+				if intensityMap[i] >= totalInsturments-1 and sum(peopleWhoHavePlayed) != totalInsturments:
 						thisFail.append('tuti before everyone played before')
 						goodToGo = False
 				for p in range(totalInsturments):
@@ -140,11 +140,11 @@ def getAssignments(totalInsturments,totalLength,soloist):
 				if intensityMap[i] != 1:
 					if soloInfo[len(soloInfo)-1] != 0:
 						soloInfo.append(0)
-			if len(soloInfo) > 5:
+			if len(soloInfo) > max(12-totalInsturments, 3):
 				goodToGo = False
-				thisFail.append('more than five solos')
-			if sum(soloInfo) > totalLength * .25:
-				thisFail.append('solos are more than a quarter')
+				thisFail.append('more than six solos')
+			if sum(soloInfo) > totalLength * .3:
+				thisFail.append('solos are more than a third')
 				goodToGo = False
 
 			# make sure no one is playing a bit for less than .5 of shortest playing:
@@ -159,12 +159,12 @@ def getAssignments(totalInsturments,totalLength,soloist):
 				if partInfo[len(partInfo)-1] == 0:
 					partInfo.remove(0)  
 				# print partInfo
-				if max(partInfo) > totalLength*.3:
+				if max(partInfo) > totalLength*.35:
 					goodToGo = False
-					thisFail.append('someone plays for more than a quarter of the piece straight')
-				if min(partInfo) < shortestLength*.6:
+					thisFail.append('someone plays for more than .35 of the piece straight')
+				if min(partInfo) < shortestLength:
 					goodToGo = False
-					thisFail.append('people play for less than .6*shortest length')
+					thisFail.append('people play for less than shortest length')
 
 			#make sure there are no places where we have very little overlap
 			overlapVersionParts = []
@@ -186,9 +186,10 @@ def getAssignments(totalInsturments,totalLength,soloist):
 					failureReasons[fr] += 1
 				else:
 					failureReasons[fr] = 1
-			print "****"
-			for f in failureReasons:
-				print f, failureReasons[f]
+			if .996 < random.random():
+				print "****"
+				for f in failureReasons:
+					print f, failureReasons[f]
 
 			if goodToGo:
 				return parts
