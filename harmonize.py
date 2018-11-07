@@ -56,7 +56,7 @@ def newHarmony(otherHarmonies,segNumb):
 	goodToGo = False
 	while goodToGo == False:
 		newHarmony = random.choice(range(len(compose.scale)))
-		if newHarmony not in otherHarmonies:
+		if newHarmony not in otherHarmonies or len(compose.scale) == len(otherHarmonies):
 			goodToGo = True
 	return newHarmony
 
@@ -76,6 +76,7 @@ def genHarmonies(ranges, segments, assignments, key):
 			transposition[i].append(None)
 	for segNumb in range(len(segments)):
 		for insturment in range(len(ranges)):
+			print segNumb, insturment
 			if assignments[insturment][segNumb] == 0:
 				continue
 			else:
@@ -86,28 +87,42 @@ def genHarmonies(ranges, segments, assignments, key):
 					newTrans = getCloseToActualRange(ranges[insturment],midiRange)*len(compose.scale)
 				else:
 					if assignments[insturment][segNumb-1] == 0:
-						# first figure out what harmonies we want to play.
+						# if it is your first or last time, you are going to play naturally.
+						hasGoneYet = False
+						for i in range(segNumb-1):
+							if assignments[insturment][i] == 1:
+								hasGoneYet = True
+
+						isLastTimeToPlay = True
+						hasEnded = False
+						for i in range(segNumb,len(segments)):
+							if assignments[insturment][i] == 0:
+								hasEnded = True
+							if assignments[insturment][i] == 1 and hasEnded:
+								isLastTimeToPlay = False
 						harmonicTranspose = 0
-						# first figure out what the other harmonies are
-						otherHarmonies = []
-						for i in range(len(ranges)):
-							if transposition[i][segNumb] != None:
-								otherHarmonies.append(transposition[i][segNumb]%len(compose.scale))
-						otherHarmonies = list(set(otherHarmonies))
-						if False:
+						if (not hasGoneYet) or (isLastTimeToPlay):
 							harmonicTranspose = 0
 						else:
-							harmonicTranspose = newHarmony(otherHarmonies,segNumb)
+
+							# else, we'll play in something that is not being played.
+							# first figure out what harmonies we want to play.
+							# first figure out what the other harmonies are
+							otherHarmonies = []
+							for i in range(len(ranges)):
+								if transposition[i][segNumb] != None:
+									otherHarmonies.append(transposition[i][segNumb]%len(compose.scale))
+							otherHarmonies = list(set(otherHarmonies))
+							if False:
+								harmonicTranspose = 0
+							else:
+								harmonicTranspose = newHarmony(otherHarmonies,segNumb)
 						#then figure out what range is best/most true
 						# just random choose high or low
 						playingSegments = extractPlayingSegment(segments,assignments,segNumb,insturment)
 						midiRange = getMidiRange(playingSegments,harmonicTranspose)
 						newTrans = getCloseToActualRange(ranges[insturment], midiRange)*len(compose.scale)+harmonicTranspose
-						#set all the things here
-						# we need to set this earlier
-						if segNumb > .85*len(segments) and assignments[insturment][len(segments)-1] == 1:
-							print 'HERE????'
-							newTrans = 0
+							
 				if newTrans != None:
 					transposition[insturment][segNumb] = newTrans
 					# apply it to everything in the future that is similar to this one
