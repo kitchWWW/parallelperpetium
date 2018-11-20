@@ -123,16 +123,16 @@ def getAssignments(totalInsturments,totalLength,soloist):
 			# print intensityMap
 
 			# make sure everyone plays before we have a big tuti
-
-			peopleWhoHavePlayed = [0]*totalInsturments
-			for i in range(totalLength):
-				if intensityMap[i] >= totalInsturments-1 and sum(peopleWhoHavePlayed) != totalInsturments:
-						if totalInsturments < 7:
-							thisFail.append('tuti before everyone played before')
-							goodToGo = False
-				for p in range(totalInsturments):
-					if parts[p][i] == 1:
-						peopleWhoHavePlayed[p] = 1
+			if totalInsturments > 3:
+				peopleWhoHavePlayed = [0]*totalInsturments
+				for i in range(totalLength):
+					if intensityMap[i] >= totalInsturments-1 and sum(peopleWhoHavePlayed) != totalInsturments:
+							if totalInsturments < 7:
+								thisFail.append('tuti before everyone played before')
+								goodToGo = False
+					for p in range(totalInsturments):
+						if parts[p][i] == 1:
+							peopleWhoHavePlayed[p] = 1
 			
 			#make sure no one plays solo for more than a short bit
 			soloInfo = [0]
